@@ -1,67 +1,128 @@
-# Curb Your Enthusiasm Episode Rating Scraper
+# 🎭 Curb Your Enthusiasm Episode Analysis
 
-This script scrapes episode rating information for all seasons of Curb Your Enthusiasm from IMDB.
+An interactive data visualization project analyzing all 120 episodes of Curb Your Enthusiasm across 12 seasons, featuring IMDB ratings, episode information, and beautiful visual analytics.
 
-## Installation
+![Curb Your Enthusiasm Visualization](https://img.shields.io/badge/Episodes-120-blue) ![Seasons](https://img.shields.io/badge/Seasons-12-green) ![Rating](https://img.shields.io/badge/Rating-Interactive-purple)
 
-1. Install the required dependencies:
-```bash
-pip install -r requirements.txt
+## ✨ Features
+
+- 🎨 **Interactive Chart Visualization** - Scatter plot with unique shapes for each season
+- 🌈 **Color-Coded Ratings** - Red to green gradient based on IMDB ratings
+- 🔍 **Advanced Filtering** - Toggle individual seasons on/off
+- 📊 **Dual View Modes** - Switch between individual episodes and season averages
+- 📋 **Sortable Data Table** - Complete episode information with sorting capabilities
+- 🎯 **Real-time Statistics** - Dynamic stats panel with filtering
+- 💎 **Modern UI Design** - Glass morphism design with gradient backgrounds
+- 📱 **Responsive Layout** - Works on desktop and mobile devices
+
+## 🚀 Quick Start
+
+### Prerequisites
+- Python 3.x
+- Web browser
+
+### Installation & Setup
+
+1. **Clone the repository:**
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/curb-your-enthusiasm-analysis.git
+   cd curb-your-enthusiasm-analysis
+   ```
+
+2. **Install dependencies:**
+   ```bash
+   pip install -r requirements.txt
+   ```
+
+3. **Start the local server:**
+   ```bash
+   python3 start_server.py
+   ```
+
+4. **Open your browser:**
+   - The visualization will automatically open at `http://localhost:8000`
+   - Or manually navigate to `http://localhost:8000/curb_episodes_visualization.html`
+
+## 📊 Data Overview
+
+- **120 Episodes** across 12 seasons (2000-2024)
+- **Complete Episode Information**: Titles, descriptions, air dates, directors
+- **IMDB Ratings & Vote Counts** for comprehensive analysis
+- **Season Shapes**: Each season has a unique visual identifier
+
+## 🛠️ Project Structure
+
+```
+├── curb_episodes_visualization.html  # Main interactive visualization
+├── curb_episodes_with_credits.csv   # Complete episode dataset
+├── start_server.py                  # Local web server
+├── scrape_curb_episodes.py         # IMDB data scraping script
+├── get_episode_credits.py          # Credits extraction script
+├── requirements.txt                # Python dependencies
+└── README.md                       # This file
 ```
 
-## Usage
+## 🎮 How to Use
 
-Run the script to scrape all 12 seasons of Curb Your Enthusiasm:
+### Chart Interaction
+- **Filter by Season**: Click season filter buttons to show/hide specific seasons
+- **Toggle Views**: Switch between "Episode Mode" and "Season Average Mode"
+- **Hover for Details**: Hover over data points to see episode information
 
-```bash
-python scrape_curb_episodes.py
-```
+### Table Features
+- **Sort Data**: Click any column header to sort
+- **Reset Order**: Use the "Reset Sort" button to return to original order
+- **Synchronized Filtering**: Table automatically updates with chart filters
 
-## Output
+### Rating Color Scale
+- 🔴 **Red**: Lower ratings (~7.0)
+- 🟡 **Yellow**: Average ratings (~8.25)
+- 🟢 **Green**: Higher ratings (~9.5)
 
-The script will create two files:
-- `curb_episodes.csv` - Episode data in CSV format
-- `curb_episodes.json` - Episode data in JSON format
+## 📈 Key Insights
 
-## Data Fields
+- **Highest Rated Episode**: [Dynamically calculated from data]
+- **Season Performance**: Visual comparison across all 12 seasons
+- **Rating Distribution**: Clear visualization of episode quality trends
+- **Director Analysis**: Complete director information for each episode
 
-Each episode contains the following information:
-- **season**: Season number (1-12)
-- **episode**: Episode number within the season
-- **title**: Episode title
-- **air_date**: Original air date
-- **rating**: IMDB rating (out of 10)
-- **votes**: Number of votes for the rating
-- **description**: Episode description/plot summary
+## 🔧 Technical Details
 
-## Features
+### Built With
+- **Frontend**: HTML5, CSS3, JavaScript
+- **Visualization**: Chart.js for interactive charts
+- **Data Processing**: Papa Parse for CSV handling
+- **Styling**: Custom CSS with glass morphism design
+- **Backend**: Python HTTP server for local hosting
 
-- **Rate Limiting**: Includes 1-second delays between requests to be respectful to IMDB's servers
-- **Error Handling**: Robust error handling for network issues and parsing errors
-- **Logging**: Detailed logging of the scraping process
-- **Multiple Formats**: Saves data in both CSV and JSON formats
-- **Summary Statistics**: Displays summary statistics including highest/lowest rated episodes
+### Data Sources
+- **IMDB**: Episode ratings, vote counts, and metadata
+- **Web Scraping**: Custom Python scripts for data collection
 
-## Example Output
+## 🤝 Contributing
 
-```
-CURB YOUR ENTHUSIASM EPISODE SCRAPING SUMMARY
-============================================================
-Total Episodes: 120
-Total Seasons: 12
+Contributions are welcome! Feel free to:
+- Report bugs or issues
+- Suggest new features
+- Submit pull requests
+- Improve documentation
 
-Episodes per Season:
-  Season 1: 10 episodes (avg rating: 8.2)
-  Season 2: 10 episodes (avg rating: 8.4)
-  ...
+## 📝 License
 
-Highest Rated Episode: S4E8 - The Car Pool Lane (9.2/10)
-Lowest Rated Episode: S9E4 - Running with the Bulls (7.1/10)
-```
+This project is open source and available under the [MIT License](LICENSE).
 
-## Notes
+## 👨‍💻 Author
 
-- The script includes proper User-Agent headers to avoid being blocked
-- All data is scraped from publicly available IMDB pages
-- The script is designed to be run once to collect all data
-- Be respectful when scraping - the script includes rate limiting 
+**Jesse Walker**
+- GitHub: [@YOUR_GITHUB_USERNAME](https://github.com/YOUR_GITHUB_USERNAME)
+- Email: jessejameswalker@mac.com
+
+## 🙏 Acknowledgments
+
+- **Larry David** - For creating this masterpiece of a show
+- **IMDB** - For providing comprehensive episode data
+- **Chart.js** - For the excellent charting library
+
+---
+
+*"Pretty, pretty, pretty good data visualization!"* - Larry David (probably) 
