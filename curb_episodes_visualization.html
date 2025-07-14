@@ -1,0 +1,1527 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Curb Your Enthusiasm Episodes - Interactive Rating Visualization</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            position: relative;
+        }
+        
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.1) 0%, transparent 50%);
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            padding: 40px;
+            border-radius: 24px;
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.15),
+                0 1px 3px rgba(0, 0, 0, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        h1 {
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 40px;
+            font-size: 3.2em;
+            font-family: 'Playfair Display', serif;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            position: relative;
+        }
+        
+        h1::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 4px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 2px;
+        }
+        
+        .controls {
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 250, 252, 0.9) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+        }
+        #seasonFilters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        .season-filter {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin: 5px;
+            padding: 12px 16px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+
+        
+        .season-filter:hover {
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .season-filter.inactive {
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            color: #6c757d;
+            transform: none;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .season-filter.inactive:hover {
+            background: linear-gradient(135deg, #dee2e6 0%, #ced4da 100%);
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.15);
+        }
+        
+        .season-filter .shape-icon {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 650px;
+            margin-bottom: 40px;
+            padding: 30px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
+            border-radius: 20px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+        }
+        
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 24px;
+            margin-top: 40px;
+        }
+        
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 250, 252, 0.9) 100%);
+            padding: 32px 24px;
+            border-radius: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+
+        
+        .stat-card:hover {
+            box-shadow: 
+                0 20px 40px rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 16px 0;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 2.8em;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        .controls-header {
+            width: 100%;
+            margin-bottom: 20px;
+        }
+        
+        .controls-header h3 {
+            margin: 0 0 16px 0;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 18px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .header-controls {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .view-toggle {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .toggle-label {
+            font-weight: 500;
+            color: #4a5568;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 32px;
+        }
+        
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(135deg, #e9ecef 0%, #dee2e6 100%);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            border-radius: 32px;
+            box-shadow: 
+                inset 0 2px 4px rgba(0, 0, 0, 0.1),
+                0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 28px;
+            width: 28px;
+            left: 2px;
+            bottom: 2px;
+            background: linear-gradient(135deg, #ffffff 0%, #f8f9fa 100%);
+            border-radius: 50%;
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            box-shadow: 
+                0 2px 8px rgba(0, 0, 0, 0.15),
+                0 1px 2px rgba(0, 0, 0, 0.1);
+        }
+        
+        input:checked + .slider {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        input:checked + .slider:before {
+            transform: translateX(28px);
+        }
+        
+        .select-all-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+
+        
+        .select-all-btn:hover {
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+        }
+        
+        .rating-legend {
+            margin-top: 24px;
+        }
+        
+        .rating-legend h4 {
+            margin: 0 0 16px 0;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 16px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .color-scale {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 20px;
+            align-items: center;
+            padding: 16px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(247, 250, 252, 0.7) 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
+        }
+        
+        .color-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 12px;
+            background: rgba(255, 255, 255, 0.6);
+            border-radius: 12px;
+            transition: all 0.3s ease;
+        }
+        
+        .color-item:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .color-box {
+            width: 24px;
+            height: 24px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .color-item span {
+            font-size: 13px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+
+        
+
+        
+        /* Table Styles */
+        .table-section {
+            margin-top: 50px;
+        }
+        
+        .table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+            gap: 16px;
+        }
+        
+        .table-header h2 {
+            margin: 0;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .reset-btn {
+            padding: 12px 24px;
+            background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
+            color: white;
+            border: none;
+            border-radius: 16px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 14px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .reset-btn:hover {
+            box-shadow: 0 8px 20px rgba(245, 101, 101, 0.4);
+        }
+        
+        .table-container {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
+            border-radius: 20px;
+            padding: 0;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 
+                0 10px 30px rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+        }
+        
+        #episodeTable {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 14px;
+        }
+        
+        #episodeTable th {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 16px 12px;
+            text-align: left;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            user-select: none;
+        }
+        
+        #episodeTable th:hover {
+            background: linear-gradient(135deg, #5a67d8 0%, #6b46c1 100%);
+        }
+        
+        #episodeTable th:first-child {
+            border-top-left-radius: 20px;
+        }
+        
+        #episodeTable th:last-child {
+            border-top-right-radius: 20px;
+        }
+        
+        .sort-arrow {
+            font-size: 12px;
+            margin-left: 4px;
+            opacity: 0.7;
+        }
+        
+        .sort-arrow.asc::after {
+            content: ' ↑';
+            color: #ffd700;
+        }
+        
+        .sort-arrow.desc::after {
+            content: ' ↓';
+            color: #ffd700;
+        }
+        
+        #episodeTable td {
+            padding: 16px 12px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+            vertical-align: top;
+        }
+        
+        #episodeTable tbody tr:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        #episodeTable tbody tr:nth-child(even) {
+            background: rgba(247, 250, 252, 0.5);
+        }
+        
+        #episodeTable tbody tr:nth-child(even):hover {
+            background: rgba(102, 126, 234, 0.08);
+        }
+        
+        .season-cell {
+            font-weight: 600;
+            color: #667eea;
+        }
+        
+        .episode-cell {
+            font-weight: 500;
+            color: #4a5568;
+        }
+        
+        .title-cell {
+            font-weight: 600;
+            color: #2d3748;
+            min-width: 150px;
+        }
+        
+        .synopsis-cell {
+            color: #718096;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+        
+        .rating-cell {
+            font-weight: 600;
+            font-size: 15px;
+        }
+        
+        .votes-cell {
+            color: #718096;
+            font-size: 13px;
+        }
+        
+        .director-cell {
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 10px;
+            }
+            
+            h1 {
+                font-size: 2.5em;
+            }
+            
+            .chart-container {
+                height: 500px;
+                padding: 20px;
+            }
+            
+            .header-controls {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .stats {
+                grid-template-columns: 1fr;
+            }
+            
+            .table-container {
+                overflow-x: auto;
+            }
+            
+            #episodeTable {
+                min-width: 800px;
+            }
+            
+            .table-header {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 Curb Your Enthusiasm Episodes - Rating Analysis</h1>
+        
+        <div class="controls">
+            <div class="controls-header">
+                <h3>Season Filters (Click to toggle):</h3>
+                <div class="header-controls">
+                    <div class="view-toggle">
+                        <label class="toggle-switch">
+                            <input type="checkbox" id="viewToggle">
+                            <span class="slider"></span>
+                        </label>
+                        <span class="toggle-label">Show Season Averages</span>
+                    </div>
+                    <button class="select-all-btn" onclick="toggleAllSeasons()">Deselect All</button>
+                </div>
+            </div>
+            <div id="seasonFilters"></div>
+            
+            <div class="rating-legend">
+                <h4>Rating Color Scale:</h4>
+                <div class="color-scale" id="colorScale">
+                    <!-- Will be populated by JavaScript with actual season shapes -->
+                </div>
+            </div>
+        </div>
+
+        <div class="chart-container">
+            <canvas id="episodeChart"></canvas>
+        </div>
+
+        <div class="stats" id="stats"></div>
+        
+        <div class="table-section">
+            <div class="table-header">
+                <h2>📊 Episode Data Table</h2>
+                <button class="reset-btn" onclick="resetTableSort()">Reset Sort</button>
+            </div>
+            <div class="table-container">
+                <table id="episodeTable">
+                    <thead>
+                        <tr>
+                            <th onclick="sortTable(0)">Season <span class="sort-arrow">↕</span></th>
+                            <th onclick="sortTable(1)">Episode <span class="sort-arrow">↕</span></th>
+                            <th onclick="sortTable(2)">Title <span class="sort-arrow">↕</span></th>
+                            <th onclick="sortTable(3)">Synopsis <span class="sort-arrow">↕</span></th>
+                            <th onclick="sortTable(4)">Rating <span class="sort-arrow">↕</span></th>
+                            <th onclick="sortTable(5)">Votes <span class="sort-arrow">↕</span></th>
+                            <th onclick="sortTable(6)">Director <span class="sort-arrow">↕</span></th>
+                        </tr>
+                    </thead>
+                    <tbody id="episodeTableBody">
+                        <!-- Table rows will be populated by JavaScript -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let episodeData = [];
+        let chart;
+        let allSeasonsSelected = true;
+        let showSeasonAverages = false;
+        
+        // Table sorting variables
+        let originalEpisodeData = [];
+        let currentSortColumn = -1;
+        let currentSortDirection = 'asc';
+
+        // Season shapes - unique shape for each season
+        const seasonShapes = {
+            1: 'circle',
+            2: 'square', 
+            3: 'triangle',
+            4: 'diamond',
+            5: 'pentagon',
+            6: 'hexagon',
+            7: 'star',
+            8: 'heart',
+            9: 'cross',
+            10: 'arrow',
+            11: 'oval',
+            12: 'octagon'
+        };
+
+        // Get color based on rating (7.0 = red, 8.25 = yellow, 9.5 = green)
+        function getRatingColor(rating) {
+            const minRating = 7.0;
+            const maxRating = 9.5;
+            const normalizedRating = (rating - minRating) / (maxRating - minRating);
+            
+            // Create gradient from red to yellow to green
+            if (normalizedRating <= 0.5) {
+                // Red to yellow
+                const ratio = normalizedRating * 2;
+                const r = 255;
+                const g = Math.round(255 * ratio);
+                const b = 0;
+                return `rgb(${r}, ${g}, ${b})`;
+            } else {
+                // Yellow to green
+                const ratio = (normalizedRating - 0.5) * 2;
+                const r = Math.round(255 * (1 - ratio));
+                const g = 255;
+                const b = 0;
+                return `rgb(${r}, ${g}, ${b})`;
+            }
+        }
+
+        // Create shape icon based on season and rating
+        function createShapeIcon(season, rating) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 24;
+            canvas.height = 24;
+            const ctx = canvas.getContext('2d');
+            
+            const centerX = 12;
+            const centerY = 12;
+            const size = 10;
+            const color = getRatingColor(rating);
+            
+            ctx.fillStyle = color;
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 2;
+            
+            const shape = seasonShapes[season];
+            
+            switch(shape) {
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, size, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'square':
+                    ctx.fillRect(centerX - size, centerY - size, size * 2, size * 2);
+                    ctx.strokeRect(centerX - size, centerY - size, size * 2, size * 2);
+                    break;
+                    
+                case 'triangle':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY - size);
+                    ctx.lineTo(centerX - size, centerY + size);
+                    ctx.lineTo(centerX + size, centerY + size);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'diamond':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY - size);
+                    ctx.lineTo(centerX + size, centerY);
+                    ctx.lineTo(centerX, centerY + size);
+                    ctx.lineTo(centerX - size, centerY);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'pentagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'hexagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i * 2 * Math.PI) / 6;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'star':
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                        const outerX = centerX + size * Math.cos(angle);
+                        const outerY = centerY + size * Math.sin(angle);
+                        const innerAngle = angle + Math.PI / 5;
+                        const innerX = centerX + (size * 0.5) * Math.cos(innerAngle);
+                        const innerY = centerY + (size * 0.5) * Math.sin(innerAngle);
+                        
+                        if (i === 0) ctx.moveTo(outerX, outerY);
+                        else ctx.lineTo(outerX, outerY);
+                        ctx.lineTo(innerX, innerY);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'heart':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY + size/2);
+                    ctx.bezierCurveTo(centerX - size, centerY - size/2, centerX - size, centerY - size, centerX, centerY - size/4);
+                    ctx.bezierCurveTo(centerX + size, centerY - size, centerX + size, centerY - size/2, centerX, centerY + size/2);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'cross':
+                    const crossSize = size * 0.8;
+                    ctx.fillRect(centerX - crossSize/3, centerY - crossSize, crossSize*2/3, crossSize*2);
+                    ctx.fillRect(centerX - crossSize, centerY - crossSize/3, crossSize*2, crossSize*2/3);
+                    ctx.strokeRect(centerX - crossSize/3, centerY - crossSize, crossSize*2/3, crossSize*2);
+                    ctx.strokeRect(centerX - crossSize, centerY - crossSize/3, crossSize*2, crossSize*2/3);
+                    break;
+                    
+                case 'arrow':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY - size);
+                    ctx.lineTo(centerX + size/2, centerY - size/2);
+                    ctx.lineTo(centerX + size/4, centerY - size/2);
+                    ctx.lineTo(centerX + size/4, centerY + size);
+                    ctx.lineTo(centerX - size/4, centerY + size);
+                    ctx.lineTo(centerX - size/4, centerY - size/2);
+                    ctx.lineTo(centerX - size/2, centerY - size/2);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'oval':
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, size, size * 0.6, 0, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'octagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i * 2 * Math.PI) / 8;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+            }
+            
+            return canvas;
+        }
+
+        // Create filter shape icon (blue, for filters)
+        function createFilterShapeIcon(season) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 20;
+            canvas.height = 20;
+            const ctx = canvas.getContext('2d');
+            
+            const centerX = 10;
+            const centerY = 10;
+            const size = 8;
+            const color = '#ffffff'; // White for filter buttons
+            
+            ctx.fillStyle = color;
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 1.5;
+            
+            const shape = seasonShapes[season];
+            
+            switch(shape) {
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, size, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'square':
+                    ctx.fillRect(centerX - size, centerY - size, size * 2, size * 2);
+                    ctx.strokeRect(centerX - size, centerY - size, size * 2, size * 2);
+                    break;
+                    
+                case 'triangle':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY - size);
+                    ctx.lineTo(centerX - size, centerY + size);
+                    ctx.lineTo(centerX + size, centerY + size);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'diamond':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY - size);
+                    ctx.lineTo(centerX + size, centerY);
+                    ctx.lineTo(centerX, centerY + size);
+                    ctx.lineTo(centerX - size, centerY);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'pentagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'hexagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i * 2 * Math.PI) / 6;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'star':
+                    ctx.beginPath();
+                    for (let i = 0; i < 5; i++) {
+                        const angle = (i * 2 * Math.PI) / 5 - Math.PI / 2;
+                        const outerX = centerX + size * Math.cos(angle);
+                        const outerY = centerY + size * Math.sin(angle);
+                        const innerAngle = angle + Math.PI / 5;
+                        const innerX = centerX + (size * 0.5) * Math.cos(innerAngle);
+                        const innerY = centerY + (size * 0.5) * Math.sin(innerAngle);
+                        
+                        if (i === 0) ctx.moveTo(outerX, outerY);
+                        else ctx.lineTo(outerX, outerY);
+                        ctx.lineTo(innerX, innerY);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'heart':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY + size/2);
+                    ctx.bezierCurveTo(centerX - size, centerY - size/2, centerX - size, centerY - size, centerX, centerY - size/4);
+                    ctx.bezierCurveTo(centerX + size, centerY - size, centerX + size, centerY - size/2, centerX, centerY + size/2);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'cross':
+                    const crossSize = size * 0.8;
+                    ctx.fillRect(centerX - crossSize/3, centerY - crossSize, crossSize*2/3, crossSize*2);
+                    ctx.fillRect(centerX - crossSize, centerY - crossSize/3, crossSize*2, crossSize*2/3);
+                    ctx.strokeRect(centerX - crossSize/3, centerY - crossSize, crossSize*2/3, crossSize*2);
+                    ctx.strokeRect(centerX - crossSize, centerY - crossSize/3, crossSize*2, crossSize*2/3);
+                    break;
+                    
+                case 'arrow':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY - size);
+                    ctx.lineTo(centerX + size/2, centerY - size/2);
+                    ctx.lineTo(centerX + size/4, centerY - size/2);
+                    ctx.lineTo(centerX + size/4, centerY + size);
+                    ctx.lineTo(centerX - size/4, centerY + size);
+                    ctx.lineTo(centerX - size/4, centerY - size/2);
+                    ctx.lineTo(centerX - size/2, centerY - size/2);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'oval':
+                    ctx.beginPath();
+                    ctx.ellipse(centerX, centerY, size, size * 0.6, 0, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'octagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i * 2 * Math.PI) / 8;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+            }
+            
+            return canvas;
+        }
+
+        // Load CSV data
+        fetch('curb_episodes_with_credits.csv')
+            .then(response => response.text())
+            .then(csvData => {
+                Papa.parse(csvData, {
+                    header: true,
+                    complete: function(results) {
+                        episodeData = results.data.filter(row => row.season && row.episode);
+                        // Convert data types
+                        episodeData = episodeData.map(row => ({
+                            ...row,
+                            season: parseInt(row.season),
+                            episode: parseInt(row.episode),
+                            rating: parseFloat(row.rating),
+                            votes: parseInt(row.votes)
+                        }));
+                        
+                        initializeApp();
+                    }
+                });
+            })
+            .catch(error => {
+                console.error('Error loading CSV:', error);
+                alert('Error loading episode data. Please make sure curb_episodes_with_credits.csv is in the same directory.');
+            });
+
+        function initializeApp() {
+            createSeasonFilters();
+            createRatingColorScale();
+            createChart();
+            updateStats();
+            setupViewToggle();
+            populateTable();
+        }
+
+        function setupViewToggle() {
+            const viewToggle = document.getElementById('viewToggle');
+            viewToggle.addEventListener('change', function() {
+                showSeasonAverages = this.checked;
+                updateChart();
+                updateChartTitle();
+            });
+        }
+
+        function updateChartTitle() {
+            const title = showSeasonAverages ? 
+                'Season Average Ratings (Shape = Season, Color = Rating)' : 
+                'Episode Ratings by Season (Shape = Season, Color = Rating)';
+            chart.options.plugins.title.text = title;
+            chart.update('none'); // Update without animation
+        }
+
+        function calculateSeasonAverages() {
+            const seasons = [...new Set(episodeData.map(ep => ep.season))].sort((a, b) => a - b);
+            return seasons.map(season => {
+                const seasonEpisodes = episodeData.filter(ep => ep.season === season);
+                const avgRating = seasonEpisodes.reduce((sum, ep) => sum + ep.rating, 0) / seasonEpisodes.length;
+                const totalVotes = seasonEpisodes.reduce((sum, ep) => sum + ep.votes, 0);
+                
+                return {
+                    season: season,
+                    episode: 1, // Not really used for season averages
+                    title: `Season ${season} Average`,
+                    rating: parseFloat(avgRating.toFixed(2)),
+                    votes: totalVotes,
+                    description: `Average of ${seasonEpisodes.length} episodes`,
+                    director: 'Various',
+                    writer: 'Larry David',
+                    air_date: seasonEpisodes[0].air_date // Use first episode's air date
+                };
+            });
+        }
+
+        function createRatingColorScale() {
+            const colorScaleContainer = document.getElementById('colorScale');
+            const ratings = [7.0, 7.75, 8.25, 8.75, 9.5];
+            const labels = ['7.0 (Low)', '7.75', '8.25', '8.75', '9.5 (High)'];
+            const seasons = [1, 3, 6, 9, 12]; // Sample seasons to show different shapes
+            
+            ratings.forEach((rating, index) => {
+                const colorItem = document.createElement('div');
+                colorItem.className = 'color-item';
+                
+                // Create shape with the rating color
+                const shapeContainer = document.createElement('div');
+                shapeContainer.className = 'color-box';
+                
+                const canvas = createShapeIconForRating(seasons[index], rating);
+                shapeContainer.appendChild(canvas);
+                
+                const label = document.createElement('span');
+                label.textContent = labels[index];
+                
+                colorItem.appendChild(shapeContainer);
+                colorItem.appendChild(label);
+                colorScaleContainer.appendChild(colorItem);
+            });
+        }
+
+        // Create shape icon for rating scale demonstration
+        function createShapeIconForRating(season, rating) {
+            const canvas = document.createElement('canvas');
+            canvas.width = 20;
+            canvas.height = 20;
+            const ctx = canvas.getContext('2d');
+            
+            const centerX = 10;
+            const centerY = 10;
+            const size = 8;
+            const color = getRatingColor(rating);
+            
+            ctx.fillStyle = color;
+            ctx.strokeStyle = '#333';
+            ctx.lineWidth = 1.5;
+            
+            const shape = seasonShapes[season];
+            
+            switch(shape) {
+                case 'circle':
+                    ctx.beginPath();
+                    ctx.arc(centerX, centerY, size, 0, 2 * Math.PI);
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'triangle':
+                    ctx.beginPath();
+                    ctx.moveTo(centerX, centerY - size);
+                    ctx.lineTo(centerX - size, centerY + size);
+                    ctx.lineTo(centerX + size, centerY + size);
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'hexagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 6; i++) {
+                        const angle = (i * 2 * Math.PI) / 6;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+                    
+                case 'cross':
+                    const crossSize = size * 0.8;
+                    ctx.fillRect(centerX - crossSize/3, centerY - crossSize, crossSize*2/3, crossSize*2);
+                    ctx.fillRect(centerX - crossSize, centerY - crossSize/3, crossSize*2, crossSize*2/3);
+                    ctx.strokeRect(centerX - crossSize/3, centerY - crossSize, crossSize*2/3, crossSize*2);
+                    ctx.strokeRect(centerX - crossSize, centerY - crossSize/3, crossSize*2, crossSize*2/3);
+                    break;
+                    
+                case 'octagon':
+                    ctx.beginPath();
+                    for (let i = 0; i < 8; i++) {
+                        const angle = (i * 2 * Math.PI) / 8;
+                        const x = centerX + size * Math.cos(angle);
+                        const y = centerY + size * Math.sin(angle);
+                        if (i === 0) ctx.moveTo(x, y);
+                        else ctx.lineTo(x, y);
+                    }
+                    ctx.closePath();
+                    ctx.fill();
+                    ctx.stroke();
+                    break;
+            }
+            
+            return canvas;
+        }
+
+                function createSeasonFilters() {
+            const filtersContainer = document.getElementById('seasonFilters');
+            const seasons = [...new Set(episodeData.map(ep => ep.season))].sort((a, b) => a - b);
+            
+            seasons.forEach(season => {
+                const filterButton = document.createElement('button');
+                filterButton.className = 'season-filter';
+                filterButton.id = `season-${season}`;
+                filterButton.setAttribute('data-season', season);
+                filterButton.setAttribute('data-active', 'true');
+                
+                // Create shape icon
+                const shapeIcon = document.createElement('span');
+                shapeIcon.className = 'shape-icon';
+                const canvas = createFilterShapeIcon(season);
+                shapeIcon.appendChild(canvas);
+                
+                // Create text label
+                const label = document.createElement('span');
+                label.textContent = `Season ${season}`;
+                
+                filterButton.appendChild(shapeIcon);
+                filterButton.appendChild(label);
+                
+                // Add click event listener
+                filterButton.addEventListener('click', function() {
+                    const wasActive = this.getAttribute('data-active') === 'true';
+                    const nowActive = !wasActive;
+                    this.setAttribute('data-active', nowActive);
+                    this.classList.toggle('inactive', !nowActive);
+                    updateChart();
+                });
+                
+                filtersContainer.appendChild(filterButton);
+            });
+        }
+
+        function createChart() {
+            const ctx = document.getElementById('episodeChart').getContext('2d');
+            
+            chart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: getChartDatasets()
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    animation: false,
+                    plugins: {
+                                                 title: {
+                             display: true,
+                             text: 'Episode Ratings by Season (Shape = Season, Color = Rating)',
+                             font: {
+                                 size: 16
+                             }
+                         },
+                                                 legend: {
+                             display: false
+                         },
+                        tooltip: {
+                            callbacks: {
+                                title: function(context) {
+                                    const point = context[0];
+                                    const episode = point.raw.episode;
+                                    return `S${episode.season}E${episode.episode}: ${episode.title}`;
+                                },
+                                                                 label: function(context) {
+                                     const episode = context.raw.episode;
+                                     return [
+                                         `Rating: ${episode.rating}/10`,
+                                         `Votes: ${episode.votes.toLocaleString()}`,
+                                         `Director: ${episode.director}`,
+                                         `Air Date: ${episode.air_date}`,
+                                         `Shape: ${seasonShapes[episode.season]}`
+                                     ];
+                                 }
+                            }
+                        }
+                    },
+                                         scales: {
+                         x: {
+                             title: {
+                                 display: true,
+                                 text: 'Season Number'
+                             },
+                             min: 0.5,
+                             max: 12.5,
+                             ticks: {
+                                 stepSize: 1,
+                                 callback: function(value) {
+                                     return 'Season ' + Math.round(value);
+                                 }
+                             }
+                         },
+                         y: {
+                             title: {
+                                 display: true,
+                                 text: 'IMDB Rating'
+                             },
+                             min: 7,
+                             max: 9.5
+                         }
+                     }
+                }
+            });
+        }
+
+                         function getChartDatasets() {
+            const seasons = [...new Set(episodeData.map(ep => ep.season))].sort((a, b) => a - b);
+            const datasets = [];
+            
+            // Use either season averages or individual episodes
+            const dataToUse = showSeasonAverages ? calculateSeasonAverages() : episodeData;
+
+            seasons.forEach(season => {
+                const isVisible = document.getElementById(`season-${season}`)?.getAttribute('data-active') === 'true';
+                
+                if (isVisible) {
+                    let seasonData;
+                    
+                    if (showSeasonAverages) {
+                        // For season averages, get the single average data point for this season
+                        const avgData = dataToUse.find(d => d.season === season);
+                        if (avgData) {
+                            seasonData = [{
+                                x: season, // No jittering for season averages
+                                y: avgData.rating,
+                                episode: avgData,
+                                shapeIcon: createShapeIcon(season, avgData.rating)
+                            }];
+                        } else {
+                            seasonData = [];
+                        }
+                    } else {
+                        // For individual episodes, use the original logic
+                        const seasonEpisodes = dataToUse.filter(ep => ep.season === season);
+                        seasonData = seasonEpisodes.map((ep, index) => {
+                            const shapeIcon = createShapeIcon(season, ep.rating);
+                            const jitter = seasonEpisodes.length > 1 ? 
+                                ((ep.episode - 1) / (seasonEpisodes.length - 1) - 0.5) * 0.8 : 0;
+                            return {
+                                x: season + jitter,
+                                y: ep.rating,
+                                episode: ep,
+                                shapeIcon: shapeIcon
+                            };
+                        });
+                    }
+                    
+                    datasets.push({
+                        label: `Season ${season} (${seasonShapes[season]})`,
+                        data: seasonData,
+                        backgroundColor: function(context) {
+                            const episode = context.parsed ? seasonData[context.dataIndex]?.episode : null;
+                            return episode ? getRatingColor(episode.rating) : '#999';
+                        },
+                        borderColor: '#333',
+                        borderWidth: 1,
+                        pointRadius: showSeasonAverages ? 15 : 12, // Larger points for season averages
+                        pointHoverRadius: showSeasonAverages ? 17 : 14,
+                        pointStyle: function(context) {
+                            const dataIndex = context.dataIndex;
+                            return seasonData[dataIndex]?.shapeIcon || 'circle';
+                        }
+                    });
+                }
+            });
+
+            return datasets;
+        }
+
+        function updateChart() {
+            chart.data.datasets = getChartDatasets();
+            chart.update();
+            updateStats();
+        }
+
+        function updateStats() {
+            const visibleSeasons = getVisibleSeasons();
+            
+            let visibleData, totalLabel, avgRating, highestRated, lowestRated;
+            
+            if (showSeasonAverages) {
+                const seasonAverages = calculateSeasonAverages();
+                visibleData = seasonAverages.filter(s => visibleSeasons.includes(s.season));
+                totalLabel = "Total Seasons";
+                
+                if (visibleData.length > 0) {
+                    avgRating = visibleData.reduce((sum, s) => sum + s.rating, 0) / visibleData.length;
+                    highestRated = visibleData.reduce((max, s) => s.rating > max.rating ? s : max);
+                    lowestRated = visibleData.reduce((min, s) => s.rating < min.rating ? s : min);
+                } else {
+                    avgRating = 0;
+                    highestRated = lowestRated = { rating: 0, season: 0, title: 'None' };
+                }
+            } else {
+                visibleData = episodeData.filter(ep => visibleSeasons.includes(ep.season));
+                totalLabel = "Total Episodes";
+                
+                if (visibleData.length > 0) {
+                    avgRating = visibleData.reduce((sum, ep) => sum + ep.rating, 0) / visibleData.length;
+                    highestRated = visibleData.reduce((max, ep) => ep.rating > max.rating ? ep : max);
+                    lowestRated = visibleData.reduce((min, ep) => ep.rating < min.rating ? ep : min);
+                } else {
+                    avgRating = 0;
+                    highestRated = lowestRated = { rating: 0, season: 0, episode: 0, title: 'None' };
+                }
+            }
+            
+            const highestLabel = showSeasonAverages ? 
+                `Season ${highestRated.season}: ${highestRated.title}` :
+                `S${highestRated.season}E${highestRated.episode}: ${highestRated.title}`;
+                
+            const lowestLabel = showSeasonAverages ? 
+                `Season ${lowestRated.season}: ${lowestRated.title}` :
+                `S${lowestRated.season}E${lowestRated.episode}: ${lowestRated.title}`;
+            
+            document.getElementById('stats').innerHTML = `
+                <div class="stat-card">
+                    <h3>${totalLabel}</h3>
+                    <div class="stat-value">${visibleData.length}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Average Rating</h3>
+                    <div class="stat-value">${avgRating.toFixed(2)}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Highest Rated</h3>
+                    <div class="stat-value">${highestRated.rating}</div>
+                    <div>${highestLabel}</div>
+                </div>
+                <div class="stat-card">
+                    <h3>Lowest Rated</h3>
+                    <div class="stat-value">${lowestRated.rating}</div>
+                    <div>${lowestLabel}</div>
+                </div>
+            `;
+        }
+
+        function getVisibleSeasons() {
+            const seasons = [...new Set(episodeData.map(ep => ep.season))];
+            return seasons.filter(season => {
+                const filterButton = document.getElementById(`season-${season}`);
+                return filterButton && filterButton.getAttribute('data-active') === 'true';
+            });
+        }
+
+        function toggleAllSeasons() {
+            const seasons = [...new Set(episodeData.map(ep => ep.season))];
+            allSeasonsSelected = !allSeasonsSelected;
+            
+            seasons.forEach(season => {
+                const filterButton = document.getElementById(`season-${season}`);
+                if (filterButton) {
+                    filterButton.setAttribute('data-active', allSeasonsSelected);
+                    filterButton.classList.toggle('inactive', !allSeasonsSelected);
+                }
+            });
+            
+            const button = document.querySelector('.select-all-btn');
+            button.textContent = allSeasonsSelected ? 'Deselect All' : 'Select All';
+            
+            updateChart();
+            updateTable();
+        }
+        
+        // Table functionality
+        function populateTable() {
+            const tableBody = document.getElementById('episodeTableBody');
+            const visibleSeasons = getVisibleSeasons();
+            
+            // Filter episodes by visible seasons
+            const filteredData = episodeData.filter(ep => visibleSeasons.includes(ep.season));
+            
+            tableBody.innerHTML = '';
+            
+            filteredData.forEach(episode => {
+                const row = document.createElement('tr');
+                
+                // Color-code the rating cell
+                const ratingColor = getRatingColor(episode.rating);
+                
+                row.innerHTML = `
+                    <td class="season-cell">Season ${episode.season}</td>
+                    <td class="episode-cell">${episode.episode}</td>
+                    <td class="title-cell">${episode.title}</td>
+                    <td class="synopsis-cell">${episode.description}</td>
+                    <td class="rating-cell" style="color: ${ratingColor};">${episode.rating}</td>
+                    <td class="votes-cell">${episode.votes.toLocaleString()}</td>
+                    <td class="director-cell">${episode.director}</td>
+                `;
+                
+                tableBody.appendChild(row);
+            });
+        }
+        
+        function sortTable(columnIndex) {
+            const table = document.getElementById('episodeTable');
+            const tbody = table.querySelector('tbody');
+            const rows = Array.from(tbody.rows);
+            
+            // Reset other sort arrows
+            const allArrows = table.querySelectorAll('.sort-arrow');
+            allArrows.forEach(arrow => {
+                arrow.className = 'sort-arrow';
+            });
+            
+            // Determine sort direction
+            if (currentSortColumn === columnIndex) {
+                currentSortDirection = currentSortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                currentSortColumn = columnIndex;
+                currentSortDirection = 'asc';
+            }
+            
+            // Update sort arrow
+            const currentArrow = table.querySelector(`th:nth-child(${columnIndex + 1}) .sort-arrow`);
+            currentArrow.className = `sort-arrow ${currentSortDirection}`;
+            
+            // Sort rows
+            rows.sort((a, b) => {
+                const aValue = a.cells[columnIndex].textContent.trim();
+                const bValue = b.cells[columnIndex].textContent.trim();
+                
+                let comparison = 0;
+                
+                switch (columnIndex) {
+                    case 0: // Season
+                        comparison = parseInt(aValue.replace('Season ', '')) - parseInt(bValue.replace('Season ', ''));
+                        break;
+                    case 1: // Episode
+                        comparison = parseInt(aValue) - parseInt(bValue);
+                        break;
+                    case 2: // Title
+                    case 3: // Synopsis
+                    case 6: // Director
+                        comparison = aValue.localeCompare(bValue);
+                        break;
+                    case 4: // Rating
+                        comparison = parseFloat(aValue) - parseFloat(bValue);
+                        break;
+                    case 5: // Votes
+                        comparison = parseInt(aValue.replace(/,/g, '')) - parseInt(bValue.replace(/,/g, ''));
+                        break;
+                }
+                
+                return currentSortDirection === 'asc' ? comparison : -comparison;
+            });
+            
+            // Rebuild table body
+            tbody.innerHTML = '';
+            rows.forEach(row => tbody.appendChild(row));
+        }
+        
+        function resetTableSort() {
+            currentSortColumn = -1;
+            currentSortDirection = 'asc';
+            
+            // Reset all sort arrows
+            const allArrows = document.querySelectorAll('.sort-arrow');
+            allArrows.forEach(arrow => {
+                arrow.className = 'sort-arrow';
+            });
+            
+            // Repopulate table in original order
+            populateTable();
+        }
+        
+        function updateTable() {
+            populateTable();
+        }
+    </script>
+</body>
+</html> 
