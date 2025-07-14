@@ -8,13 +8,19 @@
     <script src="https://cdn.jsdelivr.net/npm/papaparse@5.4.1/papaparse.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Playfair+Display:wght@400;700&display=swap" rel="stylesheet">
     <style>
+        /* Mobile-first responsive design */
+        * {
+            box-sizing: border-box;
+        }
+        
         body {
             font-family: 'Inter', sans-serif;
             margin: 0;
-            padding: 20px;
+            padding: 10px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             min-height: 100vh;
             position: relative;
+            font-size: 14px;
         }
         
         body::before {
@@ -36,10 +42,10 @@
             margin: 0 auto;
             background: rgba(255, 255, 255, 0.95);
             backdrop-filter: blur(10px);
-            padding: 40px;
-            border-radius: 24px;
+            padding: 20px;
+            border-radius: 16px;
             box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.15),
+                0 10px 30px rgba(0, 0, 0, 0.15),
                 0 1px 3px rgba(0, 0, 0, 0.1);
             border: 1px solid rgba(255, 255, 255, 0.2);
         }
@@ -50,65 +56,115 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-            margin-bottom: 40px;
-            font-size: 3.2em;
+            margin: 0 0 30px 0;
+            font-size: 1.8em;
             font-family: 'Playfair Display', serif;
             font-weight: 700;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
             position: relative;
+            line-height: 1.2;
         }
         
         h1::after {
             content: '';
             position: absolute;
-            bottom: -10px;
+            bottom: -8px;
             left: 50%;
             transform: translateX(-50%);
-            width: 100px;
-            height: 4px;
+            width: 60px;
+            height: 3px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border-radius: 2px;
         }
         
-        .controls {
-            margin-bottom: 40px;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 250, 252, 0.9) 100%);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
+        /* Collapsible sections for mobile */
+        .section {
+            margin-bottom: 25px;
         }
-        #seasonFilters {
+        
+        .section-header {
             display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .season-filter {
-            display: inline-flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 8px;
-            margin: 5px;
-            padding: 12px 16px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            color: white;
-            border: 2px solid transparent;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 250, 252, 0.9) 100%);
             border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
             cursor: pointer;
+            margin-bottom: 15px;
+        }
+        
+        .section-header.active {
+            border-bottom-left-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .section-header h3 {
+            margin: 0;
+            color: #4a5568;
             font-weight: 600;
-            font-size: 14px;
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            font-size: 16px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
         
-
+        .section-toggle {
+            font-size: 20px;
+            color: #667eea;
+            font-weight: bold;
+            transition: transform 0.3s ease;
+        }
+        
+        .section-toggle.active {
+            transform: rotate(180deg);
+        }
+        
+        .section-content {
+            display: none;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 250, 252, 0.9) 100%);
+            border-radius: 0 0 16px 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            border-top: none;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
+        
+        .section-content.active {
+            display: block;
+        }
+        
+        /* Season filters - mobile responsive */
+        #seasonFilters {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .season-filter {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            padding: 14px 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 600;
+            font-size: 13px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            touch-action: manipulation;
+            min-height: 48px;
+        }
         
         .season-filter:hover {
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         }
         
         .season-filter.inactive {
@@ -124,100 +180,27 @@
         }
         
         .season-filter .shape-icon {
-            width: 24px;
-            height: 24px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         
-        .chart-container {
-            position: relative;
-            height: 650px;
-            margin-bottom: 40px;
-            padding: 30px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
-            border-radius: 20px;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
-        }
-        
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 24px;
-            margin-top: 40px;
-        }
-        
-        .stat-card {
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 250, 252, 0.9) 100%);
-            padding: 32px 24px;
-            border-radius: 20px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-            backdrop-filter: blur(10px);
-            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-
-        
-        .stat-card:hover {
-            box-shadow: 
-                0 20px 40px rgba(0, 0, 0, 0.15),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
-        }
-        
-        .stat-card h3 {
-            margin: 0 0 16px 0;
-            color: #4a5568;
-            font-weight: 600;
-            font-size: 16px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
-        .stat-card .stat-value {
-            font-size: 2.8em;
-            font-weight: 700;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-            margin-bottom: 8px;
-            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-        }
-        .controls-header {
-            width: 100%;
-            margin-bottom: 20px;
-        }
-        
-        .controls-header h3 {
-            margin: 0 0 16px 0;
-            color: #4a5568;
-            font-weight: 600;
-            font-size: 18px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        
+        /* Header controls - mobile responsive */
         .header-controls {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            flex-wrap: wrap;
-            gap: 16px;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
         .view-toggle {
             display: flex;
             align-items: center;
             gap: 12px;
+            justify-content: space-between;
         }
         
         .toggle-label {
@@ -233,6 +216,7 @@
             display: inline-block;
             width: 60px;
             height: 32px;
+            flex-shrink: 0;
         }
         
         .toggle-switch input {
@@ -280,29 +264,27 @@
         }
         
         .select-all-btn {
-            padding: 12px 24px;
+            width: 100%;
+            padding: 14px 24px;
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+            min-height: 48px;
         }
-        
-
         
         .select-all-btn:hover {
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.4);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.4);
         }
         
-        .rating-legend {
-            margin-top: 24px;
-        }
-        
+        /* Rating legend - mobile responsive */
         .rating-legend h4 {
             margin: 0 0 16px 0;
             color: #4a5568;
@@ -313,25 +295,26 @@
         }
 
         .color-scale {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 20px;
-            align-items: center;
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 10px;
             padding: 16px;
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.7) 0%, rgba(247, 250, 252, 0.7) 100%);
-            border-radius: 16px;
+            border-radius: 12px;
             border: 1px solid rgba(255, 255, 255, 0.3);
             box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.6);
         }
         
         .color-item {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
+            gap: 6px;
+            padding: 10px 8px;
             background: rgba(255, 255, 255, 0.6);
-            border-radius: 12px;
+            border-radius: 8px;
             transition: all 0.3s ease;
+            text-align: center;
         }
         
         .color-item:hover {
@@ -344,37 +327,95 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
         }
         
         .color-item span {
-            font-size: 13px;
+            font-size: 11px;
             color: #4a5568;
             font-weight: 500;
+            line-height: 1.2;
         }
         
-
+        /* Chart container - mobile responsive */
+        .chart-container {
+            position: relative;
+            height: 400px;
+            margin-bottom: 30px;
+            padding: 20px;
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
+            border-radius: 16px;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+        }
         
-
+        /* Stats grid - mobile responsive */
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-bottom: 30px;
+        }
         
-        /* Table Styles */
+        .stat-card {
+            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(247, 250, 252, 0.9) 100%);
+            padding: 20px;
+            border-radius: 16px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+            backdrop-filter: blur(10px);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        
+        .stat-card:hover {
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.15);
+        }
+        
+        .stat-card h3 {
+            margin: 0 0 12px 0;
+            color: #4a5568;
+            font-weight: 600;
+            font-size: 13px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .stat-card .stat-value {
+            font-size: 3.2em !important;
+            font-weight: 700;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 8px;
+            line-height: 1;
+        }
+        
+        .stat-card div:last-child {
+            font-size: 11px;
+            color: #718096;
+            line-height: 1.3;
+        }
+        
+        /* Table section - mobile responsive */
         .table-section {
-            margin-top: 50px;
+            margin-top: 30px;
         }
         
         .table-header {
             display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-            gap: 16px;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 20px;
         }
         
         .table-header h2 {
             margin: 0;
             color: #4a5568;
             font-weight: 600;
-            font-size: 24px;
+            font-size: 18px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
         }
@@ -384,29 +425,168 @@
             background: linear-gradient(135deg, #f56565 0%, #e53e3e 100%);
             color: white;
             border: none;
-            border-radius: 16px;
+            border-radius: 12px;
             cursor: pointer;
             font-weight: 600;
             font-size: 14px;
             text-transform: uppercase;
             letter-spacing: 0.5px;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            touch-action: manipulation;
+            min-height: 48px;
         }
         
         .reset-btn:hover {
-            box-shadow: 0 8px 20px rgba(245, 101, 101, 0.4);
+            box-shadow: 0 6px 16px rgba(245, 101, 101, 0.4);
         }
         
+        /* Mobile-first table design */
         .table-container {
             background: linear-gradient(135deg, rgba(255, 255, 255, 0.95) 0%, rgba(247, 250, 252, 0.95) 100%);
-            border-radius: 20px;
-            padding: 0;
+            border-radius: 16px;
             border: 1px solid rgba(255, 255, 255, 0.3);
-            box-shadow: 
-                0 10px 30px rgba(0, 0, 0, 0.1),
-                inset 0 1px 0 rgba(255, 255, 255, 0.6);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
             backdrop-filter: blur(10px);
             overflow: hidden;
+        }
+        
+        /* Mobile card layout for table */
+        .mobile-table {
+            display: block;
+        }
+        
+        .mobile-table-item {
+            display: block;
+            padding: 20px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+            transition: all 0.3s ease;
+        }
+        
+        .mobile-table-item:hover {
+            background: rgba(102, 126, 234, 0.05);
+        }
+        
+        .mobile-table-item:last-child {
+            border-bottom: none;
+        }
+        
+        .mobile-table-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-bottom: 12px;
+        }
+        
+        .mobile-table-title {
+            font-weight: 600;
+            color: #2d3748;
+            font-size: 15px;
+            flex: 1;
+            margin-right: 10px;
+        }
+        
+        .mobile-table-season {
+            font-weight: 600;
+            color: #667eea;
+            font-size: 13px;
+            white-space: nowrap;
+        }
+        
+        .mobile-table-meta {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+        
+        .mobile-table-meta-item {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+        }
+        
+        .mobile-table-meta-label {
+            font-size: 11px;
+            color: #718096;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            font-weight: 500;
+        }
+        
+        .mobile-table-meta-value {
+            font-size: 13px;
+            color: #4a5568;
+            font-weight: 500;
+        }
+        
+        .mobile-table-synopsis {
+            font-size: 12px;
+            color: #718096;
+            line-height: 1.4;
+            margin-top: 8px;
+        }
+        
+        /* Search bar styling */
+        .search-container {
+            margin: 20px 0;
+            position: relative;
+        }
+        
+        .search-input {
+            width: 100%;
+            padding: 12px 16px 12px 40px;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 16px;
+            background: white;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .search-input:focus {
+            outline: none;
+            border-color: #667eea;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-icon {
+            position: absolute;
+            left: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: #718096;
+            font-size: 18px;
+            pointer-events: none;
+        }
+        
+        .search-clear {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #718096;
+            cursor: pointer;
+            font-size: 18px;
+            padding: 4px;
+            border-radius: 50%;
+            transition: all 0.2s ease;
+            display: none;
+        }
+        
+        .search-clear:hover {
+            color: #667eea;
+            background: rgba(102, 126, 234, 0.1);
+        }
+        
+        .search-clear.visible {
+            display: block;
+        }
+        
+        /* Desktop table - hidden on mobile */
+        .desktop-table {
+            display: none;
         }
         
         #episodeTable {
@@ -435,11 +615,11 @@
         }
         
         #episodeTable th:first-child {
-            border-top-left-radius: 20px;
+            border-top-left-radius: 16px;
         }
         
         #episodeTable th:last-child {
-            border-top-right-radius: 20px;
+            border-top-right-radius: 16px;
         }
         
         .sort-arrow {
@@ -490,7 +670,10 @@
         .title-cell {
             font-weight: 600;
             color: #2d3748;
-            min-width: 150px;
+            max-width: 200px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
         
         .synopsis-cell {
@@ -514,42 +697,132 @@
             font-weight: 500;
         }
         
-        /* Responsive design */
-        @media (max-width: 768px) {
-            .container {
+        /* Tablet breakpoint */
+        @media (min-width: 768px) {
+            body {
                 padding: 20px;
-                margin: 10px;
+                font-size: 16px;
+            }
+            
+            .container {
+                padding: 30px;
+                border-radius: 20px;
             }
             
             h1 {
                 font-size: 2.5em;
+                margin-bottom: 40px;
+            }
+            
+            .section-header {
+                display: none;
+            }
+            
+            .section-content {
+                display: block !important;
+                border-radius: 16px;
+                border: 1px solid rgba(255, 255, 255, 0.3);
+                padding: 30px;
+            }
+            
+            #seasonFilters {
+                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+                gap: 12px;
+            }
+            
+            .season-filter {
+                padding: 12px 16px;
+                font-size: 14px;
+            }
+            
+            .header-controls {
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .select-all-btn {
+                width: auto;
+            }
+            
+            .color-scale {
+                grid-template-columns: repeat(auto-fit, minmax(120px, 1fr));
             }
             
             .chart-container {
                 height: 500px;
-                padding: 20px;
-            }
-            
-            .header-controls {
-                flex-direction: column;
-                align-items: flex-start;
+                padding: 30px;
             }
             
             .stats {
-                grid-template-columns: 1fr;
+                grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+                gap: 20px;
             }
             
-            .table-container {
-                overflow-x: auto;
+            .stat-card {
+                padding: 30px 24px;
             }
             
-            #episodeTable {
-                min-width: 800px;
+            .stat-card .stat-value {
+                font-size: 3.2em !important;
             }
             
             .table-header {
-                flex-direction: column;
-                align-items: flex-start;
+                flex-direction: row;
+                justify-content: space-between;
+                align-items: center;
+            }
+            
+            .mobile-table {
+                display: none;
+            }
+            
+            .desktop-table {
+                display: block;
+            }
+        }
+        
+        /* Desktop breakpoint */
+        @media (min-width: 1024px) {
+            .container {
+                padding: 40px;
+                border-radius: 24px;
+            }
+            
+            h1 {
+                font-size: 3.2em;
+            }
+            
+            .section-content {
+                padding: 40px;
+            }
+            
+            #seasonFilters {
+                grid-template-columns: repeat(6, 1fr);
+            }
+            
+            .chart-container {
+                height: 650px;
+            }
+            
+            .stats {
+                grid-template-columns: repeat(4, 1fr);
+                gap: 24px;
+            }
+            
+            .stat-card {
+                padding: 32px 24px;
+            }
+            
+            .stat-card .stat-value {
+                font-size: 3.2em !important;
+            }
+        }
+        
+        /* Large desktop breakpoint */
+        @media (min-width: 1200px) {
+            .color-scale {
+                grid-template-columns: repeat(5, 1fr);
             }
         }
     </style>
@@ -558,58 +831,101 @@
     <div class="container">
         <h1>🎭 Curb Your Enthusiasm Episodes - Rating Analysis</h1>
         
-        <div class="controls">
-            <div class="controls-header">
-                <h3>Season Filters (Click to toggle):</h3>
+        <!-- Controls Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('controls')">
+                <h3>🎛️ Controls & Filters</h3>
+                <span class="section-toggle" id="controls-toggle">▼</span>
+            </div>
+            <div class="section-content" id="controls-content">
                 <div class="header-controls">
                     <div class="view-toggle">
+                        <span class="toggle-label">Show Season Averages</span>
                         <label class="toggle-switch">
                             <input type="checkbox" id="viewToggle">
                             <span class="slider"></span>
                         </label>
-                        <span class="toggle-label">Show Season Averages</span>
                     </div>
                     <button class="select-all-btn" onclick="toggleAllSeasons()">Deselect All</button>
                 </div>
-            </div>
-            <div id="seasonFilters"></div>
-            
-            <div class="rating-legend">
-                <h4>Rating Color Scale:</h4>
-                <div class="color-scale" id="colorScale">
-                    <!-- Will be populated by JavaScript with actual season shapes -->
+                
+                <div id="seasonFilters"></div>
+                
+                <div class="rating-legend">
+                    <h4>Rating Color Scale:</h4>
+                    <div class="color-scale" id="colorScale">
+                        <!-- Will be populated by JavaScript with actual season shapes -->
+                    </div>
                 </div>
             </div>
         </div>
 
-        <div class="chart-container">
-            <canvas id="episodeChart"></canvas>
+        <!-- Chart Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('chart')">
+                <h3>📊 Interactive Chart</h3>
+                <span class="section-toggle active" id="chart-toggle">▼</span>
+            </div>
+            <div class="section-content active" id="chart-content">
+                <div class="chart-container">
+                    <canvas id="episodeChart"></canvas>
+                </div>
+            </div>
         </div>
 
-        <div class="stats" id="stats"></div>
-        
-        <div class="table-section">
-            <div class="table-header">
-                <h2>📊 Episode Data Table</h2>
-                <button class="reset-btn" onclick="resetTableSort()">Reset Sort</button>
+        <!-- Stats Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('stats')">
+                <h3>📈 Statistics</h3>
+                <span class="section-toggle active" id="stats-toggle">▼</span>
             </div>
-            <div class="table-container">
-                <table id="episodeTable">
-                    <thead>
-                        <tr>
-                            <th onclick="sortTable(0)">Season <span class="sort-arrow">↕</span></th>
-                            <th onclick="sortTable(1)">Episode <span class="sort-arrow">↕</span></th>
-                            <th onclick="sortTable(2)">Title <span class="sort-arrow">↕</span></th>
-                            <th onclick="sortTable(3)">Synopsis <span class="sort-arrow">↕</span></th>
-                            <th onclick="sortTable(4)">Rating <span class="sort-arrow">↕</span></th>
-                            <th onclick="sortTable(5)">Votes <span class="sort-arrow">↕</span></th>
-                            <th onclick="sortTable(6)">Director <span class="sort-arrow">↕</span></th>
-                        </tr>
-                    </thead>
-                    <tbody id="episodeTableBody">
-                        <!-- Table rows will be populated by JavaScript -->
-                    </tbody>
-                </table>
+            <div class="section-content active" id="stats-content">
+                <div class="stats" id="stats"></div>
+            </div>
+        </div>
+        
+        <!-- Table Section -->
+        <div class="section">
+            <div class="section-header" onclick="toggleSection('table')">
+                <h3>📋 Episode Data</h3>
+                <span class="section-toggle" id="table-toggle">▼</span>
+            </div>
+            <div class="section-content" id="table-content">
+                <div class="table-header">
+                    <h2>Episode Data Table</h2>
+                    <button class="reset-btn" onclick="resetTableSort()">Reset Sort</button>
+                </div>
+                <div class="search-container">
+                    <div class="search-icon">🔍</div>
+                    <input type="text" id="episodeSearch" class="search-input" placeholder="Search episodes by title... (e.g., 'pants' to find 'Pants Tent')" />
+                    <button class="search-clear" id="searchClear" onclick="clearSearch()">✕</button>
+                </div>
+                <div class="table-container">
+                    <!-- Mobile table layout -->
+                    <div class="mobile-table" id="mobileTable">
+                        <!-- Will be populated by JavaScript -->
+                    </div>
+                    
+                    <!-- Desktop table layout -->
+                    <div class="desktop-table">
+                        <table id="episodeTable">
+                            <thead>
+                                <tr>
+                                    <th onclick="sortTable(0)">Season <span class="sort-arrow">↕</span></th>
+                                    <th onclick="sortTable(1)">Episode <span class="sort-arrow">↕</span></th>
+                                    <th onclick="sortTable(2)">Title <span class="sort-arrow">↕</span></th>
+                                    <th onclick="sortTable(3)">Synopsis <span class="sort-arrow">↕</span></th>
+                                    <th onclick="sortTable(4)">Rating <span class="sort-arrow">↕</span></th>
+                                    <th onclick="sortTable(5)">Votes <span class="sort-arrow">↕</span></th>
+                                    <th onclick="sortTable(6)">Director <span class="sort-arrow">↕</span></th>
+                                </tr>
+                            </thead>
+                            <tbody id="episodeTableBody">
+                                <!-- Table rows will be populated by JavaScript -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
@@ -624,6 +940,9 @@
         let originalEpisodeData = [];
         let currentSortColumn = -1;
         let currentSortDirection = 'asc';
+        
+        // Search functionality
+        let currentSearchTerm = '';
 
         // Season shapes - unique shape for each season
         const seasonShapes = {
@@ -641,26 +960,37 @@
             12: 'octagon'
         };
 
+        // Toggle section visibility (mobile)
+        function toggleSection(sectionId) {
+            const content = document.getElementById(sectionId + '-content');
+            const toggle = document.getElementById(sectionId + '-toggle');
+            const header = document.querySelector(`[onclick="toggleSection('${sectionId}')"]`);
+            
+            content.classList.toggle('active');
+            toggle.classList.toggle('active');
+            header.classList.toggle('active');
+        }
+
         // Get color based on rating (7.0 = red, 8.25 = yellow, 9.5 = green)
         function getRatingColor(rating) {
             const minRating = 7.0;
             const maxRating = 9.5;
-            const normalizedRating = (rating - minRating) / (maxRating - minRating);
+            const normalizedRating = Math.max(0, Math.min(1, (rating - minRating) / (maxRating - minRating)));
             
-            // Create gradient from red to yellow to green
+            // Create gradient from dark red to orange to dark green with better contrast
             if (normalizedRating <= 0.5) {
-                // Red to yellow
+                // Dark red to orange
                 const ratio = normalizedRating * 2;
-                const r = 255;
-                const g = Math.round(255 * ratio);
-                const b = 0;
+                const r = Math.round(180 + (75 * ratio)); // 180 to 255
+                const g = Math.round(50 + (150 * ratio));  // 50 to 200
+                const b = 20;
                 return `rgb(${r}, ${g}, ${b})`;
             } else {
-                // Yellow to green
+                // Orange to dark green
                 const ratio = (normalizedRating - 0.5) * 2;
-                const r = Math.round(255 * (1 - ratio));
-                const g = 255;
-                const b = 0;
+                const r = Math.round(255 * (1 - ratio * 0.8)); // 255 to ~50
+                const g = Math.round(200 + (55 * ratio));       // 200 to 255
+                const b = Math.round(20 + (100 * ratio));       // 20 to 120
                 return `rgb(${r}, ${g}, ${b})`;
             }
         }
@@ -1007,7 +1337,26 @@
             createChart();
             updateStats();
             setupViewToggle();
+            setupSearchListeners();
             populateTable();
+            populateMobileTable();
+            
+            // Auto-open chart and stats on mobile
+            if (window.innerWidth < 768) {
+                // Chart and stats sections are already open by default
+            }
+        }
+        
+        function setupSearchListeners() {
+            const searchInput = document.getElementById('episodeSearch');
+            const searchClear = document.getElementById('searchClear');
+            
+            // Add event listeners for search input
+            searchInput.addEventListener('input', handleSearch);
+            searchInput.addEventListener('keyup', handleSearch);
+            
+            // Clear search when clear button is clicked
+            searchClear.addEventListener('click', clearSearch);
         }
 
         function setupViewToggle() {
@@ -1150,7 +1499,7 @@
             return canvas;
         }
 
-                function createSeasonFilters() {
+        function createSeasonFilters() {
             const filtersContainer = document.getElementById('seasonFilters');
             const seasons = [...new Set(episodeData.map(ep => ep.season))].sort((a, b) => a - b);
             
@@ -1181,6 +1530,8 @@
                     this.setAttribute('data-active', nowActive);
                     this.classList.toggle('inactive', !nowActive);
                     updateChart();
+                    updateTable();
+                    updateMobileTable();
                 });
                 
                 filtersContainer.appendChild(filterButton);
@@ -1200,16 +1551,16 @@
                     maintainAspectRatio: false,
                     animation: false,
                     plugins: {
-                                                 title: {
-                             display: true,
-                             text: 'Episode Ratings by Season (Shape = Season, Color = Rating)',
-                             font: {
-                                 size: 16
-                             }
-                         },
-                                                 legend: {
-                             display: false
-                         },
+                        title: {
+                            display: true,
+                            text: 'Episode Ratings by Season (Shape = Season, Color = Rating)',
+                            font: {
+                                size: 16
+                            }
+                        },
+                        legend: {
+                            display: false
+                        },
                         tooltip: {
                             callbacks: {
                                 title: function(context) {
@@ -1217,48 +1568,49 @@
                                     const episode = point.raw.episode;
                                     return `S${episode.season}E${episode.episode}: ${episode.title}`;
                                 },
-                                                                 label: function(context) {
-                                     const episode = context.raw.episode;
-                                     return [
-                                         `Rating: ${episode.rating}/10`,
-                                         `Votes: ${episode.votes.toLocaleString()}`,
-                                         `Director: ${episode.director}`,
-                                         `Air Date: ${episode.air_date}`,
-                                         `Shape: ${seasonShapes[episode.season]}`
-                                     ];
-                                 }
+                                label: function(context) {
+                                    const episode = context.raw.episode;
+                                    return [
+                                        `Rating: ${episode.rating}/10`,
+                                        `Votes: ${episode.votes.toLocaleString()}`,
+                                        `Director: ${episode.director}`,
+                                        `Air Date: ${episode.air_date}`,
+                                        `Shape: ${seasonShapes[episode.season]}`
+                                    ];
+                                }
                             }
                         }
                     },
-                                         scales: {
-                         x: {
-                             title: {
-                                 display: true,
-                                 text: 'Season Number'
-                             },
-                             min: 0.5,
-                             max: 12.5,
-                             ticks: {
-                                 stepSize: 1,
-                                 callback: function(value) {
-                                     return 'Season ' + Math.round(value);
-                                 }
-                             }
-                         },
-                         y: {
-                             title: {
-                                 display: true,
-                                 text: 'IMDB Rating'
-                             },
-                             min: 7,
-                             max: 9.5
-                         }
-                     }
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Season Number'
+                            },
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    if (value >= 1 && value <= 12 && Number.isInteger(value)) {
+                                        return value;
+                                    }
+                                    return null;
+                                }
+                            }
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'IMDB Rating'
+                            },
+                            min: 7,
+                            max: 9.5
+                        }
+                    }
                 }
             });
         }
 
-                         function getChartDatasets() {
+        function getChartDatasets() {
             const seasons = [...new Set(episodeData.map(ep => ep.season))].sort((a, b) => a - b);
             const datasets = [];
             
@@ -1415,15 +1767,30 @@
             
             updateChart();
             updateTable();
+            updateMobileTable();
         }
         
-        // Table functionality
-        function populateTable() {
-            const tableBody = document.getElementById('episodeTableBody');
+        // Desktop table functionality
+        function getFilteredData() {
             const visibleSeasons = getVisibleSeasons();
             
             // Filter episodes by visible seasons
-            const filteredData = episodeData.filter(ep => visibleSeasons.includes(ep.season));
+            let filteredData = episodeData.filter(ep => visibleSeasons.includes(ep.season));
+            
+            // Filter by search term if present
+            if (currentSearchTerm.trim() !== '') {
+                const searchLower = currentSearchTerm.toLowerCase();
+                filteredData = filteredData.filter(ep => 
+                    ep.title.toLowerCase().includes(searchLower)
+                );
+            }
+            
+            return filteredData;
+        }
+        
+        function populateTable() {
+            const tableBody = document.getElementById('episodeTableBody');
+            const filteredData = getFilteredData();
             
             tableBody.innerHTML = '';
             
@@ -1436,7 +1803,7 @@
                 row.innerHTML = `
                     <td class="season-cell">Season ${episode.season}</td>
                     <td class="episode-cell">${episode.episode}</td>
-                    <td class="title-cell">${episode.title}</td>
+                    <td class="title-cell" title="${episode.title}">${episode.title}</td>
                     <td class="synopsis-cell">${episode.description}</td>
                     <td class="rating-cell" style="color: ${ratingColor};">${episode.rating}</td>
                     <td class="votes-cell">${episode.votes.toLocaleString()}</td>
@@ -1444,6 +1811,49 @@
                 `;
                 
                 tableBody.appendChild(row);
+            });
+        }
+        
+        // Mobile table functionality
+        function populateMobileTable() {
+            const mobileTable = document.getElementById('mobileTable');
+            const filteredData = getFilteredData();
+            
+            mobileTable.innerHTML = '';
+            
+            filteredData.forEach(episode => {
+                const item = document.createElement('div');
+                item.className = 'mobile-table-item';
+                
+                const ratingColor = getRatingColor(episode.rating);
+                
+                item.innerHTML = `
+                    <div class="mobile-table-header">
+                        <div class="mobile-table-title">${episode.title}</div>
+                        <div class="mobile-table-season">S${episode.season}E${episode.episode}</div>
+                    </div>
+                    <div class="mobile-table-meta">
+                        <div class="mobile-table-meta-item">
+                            <div class="mobile-table-meta-label">Rating</div>
+                            <div class="mobile-table-meta-value" style="color: ${ratingColor}; font-weight: 600;">${episode.rating}</div>
+                        </div>
+                        <div class="mobile-table-meta-item">
+                            <div class="mobile-table-meta-label">Votes</div>
+                            <div class="mobile-table-meta-value">${episode.votes.toLocaleString()}</div>
+                        </div>
+                        <div class="mobile-table-meta-item">
+                            <div class="mobile-table-meta-label">Director</div>
+                            <div class="mobile-table-meta-value">${episode.director}</div>
+                        </div>
+                        <div class="mobile-table-meta-item">
+                            <div class="mobile-table-meta-label">Air Date</div>
+                            <div class="mobile-table-meta-value">${episode.air_date}</div>
+                        </div>
+                    </div>
+                    <div class="mobile-table-synopsis">${episode.description}</div>
+                `;
+                
+                mobileTable.appendChild(item);
             });
         }
         
@@ -1521,6 +1931,42 @@
         
         function updateTable() {
             populateTable();
+        }
+        
+        // Search functionality
+        function handleSearch() {
+            const searchInput = document.getElementById('episodeSearch');
+            const searchClear = document.getElementById('searchClear');
+            
+            currentSearchTerm = searchInput.value;
+            
+            // Show/hide clear button based on input
+            if (currentSearchTerm.trim() !== '') {
+                searchClear.classList.add('visible');
+            } else {
+                searchClear.classList.remove('visible');
+            }
+            
+            // Update both desktop and mobile tables
+            populateTable();
+            populateMobileTable();
+        }
+        
+        function clearSearch() {
+            const searchInput = document.getElementById('episodeSearch');
+            const searchClear = document.getElementById('searchClear');
+            
+            searchInput.value = '';
+            currentSearchTerm = '';
+            searchClear.classList.remove('visible');
+            
+            // Update both desktop and mobile tables
+            populateTable();
+            populateMobileTable();
+        }
+        
+        function updateMobileTable() {
+            populateMobileTable();
         }
     </script>
 </body>
